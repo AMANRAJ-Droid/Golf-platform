@@ -28,7 +28,7 @@ export default async function DashboardPage({
     { data: upcomingDraw },
     { data: myEntries },
   ] = await Promise.all([
-    supabase.from('profiles').select('full_name, handicap').eq('id', user.id).single(),
+    supabase.from('profiles').select('full_name').eq('id', user.id).maybeSingle(),
     supabase.from('subscriptions').select('*').eq('user_id', user.id).eq('status', 'active').maybeSingle(),
     supabase.from('golf_scores').select('*').eq('user_id', user.id).order('played_on', { ascending: false }).limit(5),
     supabase.from('user_charity_selections').select('*, charities(name, image_url)').eq('user_id', user.id).maybeSingle(),
@@ -37,7 +37,7 @@ export default async function DashboardPage({
     supabase.from('draw_entries').select('draw_id').eq('user_id', user.id),
   ])
 
-  const firstName  = profile?.full_name?.split(' ')[0] ?? 'Golfer'
+  const firstName = (profile as { full_name: string | null } | null)?.full_name?.split(' ')[0] ?? 'Golfer'
   const totalWon   = recentWinnings?.reduce((sum, w) => sum + (w.prize_amount ?? 0), 0) ?? 0
   const drawsEntered = myEntries?.length ?? 0
 
